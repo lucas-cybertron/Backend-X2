@@ -2,8 +2,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.database import Base, engine
-from routers import auth, teams, matches, sponsors, tournaments  # 👈 importa os 3 routers
-from models import user, team as team_model, match as match_model  # garante criação das tabelas
+from routers import auth
+from models.models import User  # garante criação das tabelas
 
 # ===========================================================
 # 🔹 Inicializa o app FastAPI
@@ -34,10 +34,7 @@ Base.metadata.create_all(bind=engine)
 # 🔹 Registro dos routers
 # ===========================================================
 app.include_router(auth.router)    # Rotas de autenticação (/auth)
-app.include_router(teams.router)    # Rotas de times (/teams)
-app.include_router(matches.router)   # Rotas de partidas (/matches)
-app.include_router(sponsors.router)
-app.include_router(tournaments.router)
+
 
 # ===========================================================
 # 🔹 Rota inicial (teste)
