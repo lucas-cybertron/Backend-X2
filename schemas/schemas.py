@@ -128,7 +128,8 @@ class PartidaBase(BaseModel):
     time_visitante_id: int
 
 class PartidaCreate(PartidaBase):
-    pass
+    placar_mandante: int = 0
+    placar_visitante: int = 0
 
 class PartidaUpdate(BaseModel):
     placar_mandante: Optional[int] = None
@@ -169,6 +170,7 @@ class TabelaUpdate(BaseModel):
 
 class TabelaResponse(TabelaBase):
     id: int
+    time_nome: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -196,4 +198,76 @@ class PatrocinadorResponse(PatrocinadorBase):
 
     class Config:
         from_attributes = True
+
+
+# =======================
+# TORNEIO / SORTEIO
+# =======================
+class TournamentDrawRequest(BaseModel):
+    """Request para sortear um chaveamento.
+    - `team_ids`: lista de IDs de times que participarão do torneio
+    - `seeded`: opcional, se True mantém a primeira ordem e apenas cria pares (não embaralha)
+    """
+    team_ids: List[int]
+    seeded: Optional[bool] = False
+
+
+class BracketPair(BaseModel):
+    """Representa um par no chaveamento (um jogo)."""
+    team_a_id: Optional[int] = None
+    team_b_id: Optional[int] = None
+
+
+class BracketResponse(BaseModel):
+    """Resposta com pares do chaveamento ordenados por rodada simples (primeira fase)."""
+    pairs: List[BracketPair]
+
+
+class BracketPersistRequest(BaseModel):
+    """Request para sortear e persistir um chaveamento."""
+    tournament_name: str
+    team_ids: List[int]
+    seeded: Optional[bool] = False
+
+
+class BracketItem(BaseModel):
+    """Um par persistido no banco com nomes dos times."""
+    id: int
+    team_a_id: Optional[int]
+    team_a_name: Optional[str] = None
+    team_b_id: Optional[int]
+    team_b_name: Optional[str] = None
+    winner_id: Optional[int] = None
+    winner_name: Optional[str] = None
+    team_a_score: Optional[int] = None
+    team_b_score: Optional[int] = None
+
+
+class BracketPersistResponse(BaseModel):
+    """Resposta de sorteio e persistência."""
+    tournament_name: str
+    pairs_count: int
+    pairs: List[BracketItem]
+
+
+class BracketDetailResponse(BaseModel):
+    """Detalhes de um chaveamento persistido com nomes dos times."""
+    id: int
+    tournament_name: str
+    round: int
+    match_number: int
+    team_a_id: Optional[int]
+    team_a_name: Optional[str] = None
+    team_b_id: Optional[int]
+    team_b_name: Optional[str] = None
+    winner_id: Optional[int] = None
+    winner_name: Optional[str] = None
+    team_a_score: Optional[int] = None
+    team_b_score: Optional[int] = None
+
+
+class BracketListResponse(BaseModel):
+    """Lista de chaveamentos."""
+    total: int
+    items: List[BracketDetailResponse]
 

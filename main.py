@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.database import Base, engine
-from routers import auth
+from routers import auth, times, partidas, patrocinadores, torneios
 from models.models import User  # garante criação das tabelas
 
 # ===========================================================
@@ -33,7 +33,11 @@ Base.metadata.create_all(bind=engine)
 # ===========================================================
 # 🔹 Registro dos routers
 # ===========================================================
-app.include_router(auth.router)    # Rotas de autenticação (/auth)
+app.include_router(auth.router)           # Rotas de autenticação (/auth)
+app.include_router(times.router)          # Rotas de times (/times)
+app.include_router(partidas.router)       # Rotas de partidas (/partidas)
+app.include_router(patrocinadores.router) # Rotas de patrocinadores (/patrocinadores)
+app.include_router(torneios.router)      # Rotas de torneios (/torneios)
 
 
 # ===========================================================

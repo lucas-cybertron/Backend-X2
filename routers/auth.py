@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Header
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
@@ -34,7 +34,7 @@ router = APIRouter(
 # ===========================================================
 
 
-def get_token(authorization: str = None) -> str | None:
+def get_token(authorization: str = Header(None)) -> str | None:
     """
     Extrai o token do header Authorization
     """
