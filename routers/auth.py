@@ -36,7 +36,10 @@ router = APIRouter(
 
 def get_token(authorization: str = Header(None)) -> str | None:
     """
-    Extrai o token do header Authorization
+    Extrai o token JWT do header Authorization com formato: Bearer <token>
+    
+    Exemplo:
+        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     """
     if not authorization:
         return None
@@ -50,7 +53,16 @@ def get_token(authorization: str = Header(None)) -> str | None:
 
 def get_current_user_id(token: str = Depends(get_token)) -> int:
     """
-    Extrai o ID do usuário do token JWT
+    Autentica o token JWT e retorna o ID do usuário
+    
+    Fluxo:
+    1. Extrai o token do header Authorization
+    2. Decodifica e valida o token JWT
+    3. Verifica se o token é válido e não expirou
+    4. Retorna o ID do usuário dentro do token
+    
+    Raises:
+        HTTPException 401: Se o token não for fornecido, inválido ou expirado
     """
     from core.security import decode_access_token
 
@@ -79,6 +91,47 @@ def get_current_user_id(token: str = Depends(get_token)) -> int:
         )
 
     return int(user_id)
+
+
+def get_current_admin(
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> User:
+    """
+    Verifica se o usuário autenticado é um administrador
+    
+    Uso em endpoints protegidos:
+        @router.delete("/admin/users/{user_id}")
+        def delete_user(user_id: int, admin: User = Depends(get_current_admin)):
+            # Só admins podem acessar
+    
+    Args:
+        current_user_id: ID do usuário autenticado (via token JWT)
+        db: Sessão do banco de dados
+        
+    Returns:
+        User: Objeto do usuário admin
+        
+    Raises:
+        HTTPException 403: Se o usuário não é admin
+        HTTPException 404: Se o usuário não foi encontrado
+    """
+    user = db.query(User).filter(User.id == current_user_id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuário não encontrado",
+        )
+    
+    if user.type.value != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso negado: apenas administradores podem acessar este recurso",
+        )
+    
+    return user
+
 
 
 # ===========================================================
@@ -236,6 +289,19 @@ async def get_current_user(
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
+    """
+    Endpoint protegido que retorna os dados do usuário autenticado
+    
+    Requer autenticação com Bearer Token:
+        Authorization: Bearer <seu_access_token>
+    
+    Returns:
+        UserResponse: Dados do usuário logado
+        
+    Raises:
+        401: Token inválido ou expirado
+        404: Usuário não encontrado
+    """
     """
     Retorna os dados do usuário autenticado
     """

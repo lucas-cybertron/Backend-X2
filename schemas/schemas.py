@@ -1,7 +1,7 @@
 from datetime import datetime, date
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 # =======================
 # USER
@@ -14,7 +14,6 @@ class UserBase(BaseModel):
     email: EmailStr
     name: str
     phone: Optional[str] = None
-    type: Optional[UserRole] = UserRole.USER
 
 class UserCreate(UserBase):
     password: str
@@ -27,6 +26,7 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: int
+    type: UserRole
     created_at: datetime
     updated_at: datetime
 
@@ -43,6 +43,15 @@ class UserRegister(BaseModel):
     password: str
     name: str
     phone: Optional[str] = None
+    
+    @field_validator("password")
+    @classmethod
+    def validate_password_length(cls, v: str) -> str:
+        if len(v) > 72:
+            raise ValueError("Senha não pode ter mais de 72 caracteres")
+        if len(v) < 6:
+            raise ValueError("Senha deve ter pelo menos 6 caracteres")
+        return v
 
 
 class UserLogin(BaseModel):
@@ -54,6 +63,7 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     """Schema para resposta com token JWT"""
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     user: UserResponse
 
