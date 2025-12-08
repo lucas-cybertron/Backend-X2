@@ -25,7 +25,7 @@ app = FastAPI(
 # ===========================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # futuramente pode limitar para o domínio do site (ex: ["https://x2.com"])
+    allow_origins=["https://x2jogosjuvenis.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
