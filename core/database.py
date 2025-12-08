@@ -1,22 +1,25 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv  # <--- precisa disso
+from dotenv import load_dotenv
 import os
 
-# 🔹 Carrega as variáveis do arquivo .env
 load_dotenv()
 
-# 🔹 Agora ele vai encontrar o DATABASE_URL
-SQLITE_DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not SQLITE_DATABASE_URL:
+if not DATABASE_URL:
     raise ValueError("❌ DATABASE_URL não encontrada no arquivo .env")
 
-# 🔹 Cria o engine SQLite
-engine = create_engine(
-    SQLITE_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Detecta se é SQLite
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    # PostgreSQL, MySQL, etc.
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
