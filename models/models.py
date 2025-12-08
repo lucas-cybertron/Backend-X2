@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from core.database import Base
 from datetime import datetime, timezone
 import enum
+from sqlalchemy import Enum as PgEnum
 
 class UserRole(enum.Enum):
     ADMIN = "admin"
@@ -16,7 +17,7 @@ class User(Base):
     password = Column(String, nullable=False)
     name = Column(String, nullable=False)
     phone = Column(String, nullable=True)
-    type = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
+    type = Column(PgEnum(UserRole, name="user_role_enum"), default=UserRole.USER, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)  
     
