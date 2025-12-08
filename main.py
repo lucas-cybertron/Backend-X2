@@ -1,4 +1,5 @@
 # main.py
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.database import Base, engine
@@ -23,9 +24,17 @@ app = FastAPI(
 # ===========================================================
 # 🔹 Configuração do CORS (permite acesso do frontend)
 # ===========================================================
+# Define origens permitidas (desenvolvimento + produção)
+ALLOWED_ORIGINS = [
+    "https://x2jogosjuvenis.vercel.app",  # Frontend em produção
+    "http://localhost:3000",                # Frontend em desenvolvimento (React/Next.js padrão)
+    "http://localhost:5173",                # Frontend em desenvolvimento (Vite)
+    "http://localhost:8000",                # Swagger UI local
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://x2jogosjuvenis.vercel.app"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
