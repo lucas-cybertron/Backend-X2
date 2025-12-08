@@ -26,16 +26,13 @@ app = FastAPI(
 # ===========================================================
 # Define origens permitidas (desenvolvimento + produção)
 ALLOWED_ORIGINS = [
-    "https://x2jogosjuvenis.vercel.app",  # Frontend em produção
-    "http://localhost:3000",                # Frontend em desenvolvimento (React/Next.js padrão)
-    "http://localhost:5173",                # Frontend em desenvolvimento (Vite)
-    "http://localhost:8000",                # Swagger UI local
+"https://x2jogosjuvenis.vercel.app"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
